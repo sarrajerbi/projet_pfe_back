@@ -23,6 +23,8 @@ class UserController extends Controller
             'name' => $request->input('name'),
             'email' => $request->input('email'),
             'password' => Hash::make($request->input('password')),
+            'role' => 'user',
+            
         ]);
 
         return response()->json([
@@ -70,20 +72,30 @@ public function login(Request $request)
 
     // Update user
    // in UserController
-   public function update(Request $request)
-   {
-       $user = auth()->user();
-   
-       $validatedData = $request->validate([
-           'name' => 'required|string|max:255',
-           'email' => 'required|email|max:255',
-           'photo' => 'nullable|string',
-       ]);
-   
-       $user->update($validatedData);
-   
-       return response()->json(['message' => 'Profile updated successfully!', 'user' => $user]);
-   }
-   
+  // app/Http/Controllers/UserController.php
+
+public function update(Request $request)
+{
+    $user = auth()->user();
+
+    // Validation for the new fields
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:255',
+        'lname' => 'required|string|max:255',  // Last name is now required
+        'email' => 'required|email|max:255',
+        'photo' => 'nullable|string',
+        'dob' => 'nullable|date',  // Date of birth is nullable but should be a valid date
+        'telephone' => 'nullable|string|max:15',  // Phone number
+        'gender' => 'nullable|in:Homme,Femme',  // Gender selection (Homme or Femme)
+        'governorate' => 'nullable|string',  // Governorate selection
+        'city' => 'nullable|string',  // City selection
+    ]);
+
+    // Update the user with the validated data
+    $user->update($validatedData);
+
+    return response()->json(['message' => 'Profile updated successfully!', 'user' => $user]);
+}
+
     
 }

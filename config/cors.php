@@ -15,13 +15,14 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'], // Autoriser les requêtes vers ces chemins spécifiés
+    'paths' => ['api/*', 'sanctum/csrf-cookie','admin/*'], // Autoriser les requêtes vers ces chemins spécifiés
 
     'allowed_methods' => ['*'], // Autorise toutes les méthodes HTTP (GET, POST, PUT, DELETE, etc.)
 
-    'allowed_origins' => ['http://localhost:3000'], // Autoriser les origines spécifiques, par exemple l'adresse de ton frontend Next.js
-    // 'allowed_origins' => ['*'], // Tu peux aussi utiliser '*' pour autoriser toutes les origines, mais ce n'est pas recommandé en production.
-
+    'allowed_origins' => [
+        'http://localhost:3000',  // Add your frontend URL here
+        'http://127.0.0.1:3000', // Add for localhost if needed
+    ],
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'], // Autorise tous les headers
