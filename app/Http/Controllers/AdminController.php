@@ -21,14 +21,15 @@ class AdminController extends Controller
     }
 
     public function updateProfile(Request $request)
-    {
-        $admin = $request->user();
+{
+    $admin = $request->user();
 
-        if (!$admin) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
+    if (!$admin) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
 
-        // Validation des données
+    // Validation des données
+    try {
         $validatedData = $request->validate([
             'name' => 'nullable|string|max:255',
             'lname' => 'nullable|string|max:255',
@@ -36,48 +37,52 @@ class AdminController extends Controller
             'new_password' => 'nullable|string|min:8|confirmed',
             'photo' => 'nullable|image|max:2048',
         ]);
-
-        // Mise à jour des champs
-        if ($request->filled('name')) {
-            $admin->name = $validatedData['name'];
-        }
-
-        if ($request->filled('lname')) {
-            $admin->lname = $validatedData['lname'];
-        }
-
-        if ($request->filled('email')) {
-            $admin->email = $validatedData['email'];
-        }
-
-        if ($request->filled('new_password')) {
-            $admin->password = Hash::make($validatedData['new_password']);
-        }
-
-        // Gestion de la photo
-        if ($request->hasFile('photo')) {
-            // Supprimer l'ancienne photo si elle existe
-            if ($admin->photo && Storage::disk('public')->exists($admin->photo)) {
-                Storage::disk('public')->delete($admin->photo);
-            }
-
-            // Stocker la nouvelle photo
-            $photoPath = $request->file('photo')->store('photos', 'public');
-            $admin->photo = $photoPath;
-        }
-
-        // Sauvegarde des modifications
-        $admin->save();
-
-        // Retourner une réponse avec les données mises à jour
+    } catch (ValidationException $e) {
         return response()->json([
-            'message' => 'Profil mis à jour avec succès',
-            'user' => [
-                'name' => $admin->name,
-                'lname' => $admin->lname,
-                'email' => $admin->email,
-                'photo' => $admin->photo ? asset('storage/' . $admin->photo) : null, // Renvoi de la photo mise à jour
-            ],
-        ]);
+            'error' => 'Validation failed',
+            'messages' => $e->errors(),
+        ], 422);
     }
+
+    // Mise à jour des champs
+    if ($request->filled('name')) {
+        $admin->name = $validatedData['name'];
+    }
+
+    if ($request->filled('lname')) {
+        $admin->lname = $validatedData['lname'];
+    }
+
+    if ($request->filled('email')) {
+        $admin->email = $validatedData['email'];
+    }
+
+    if ($request->filled('new_password')) {
+        $admin->password = Hash::make($validatedData['new_password']);
+    }
+
+    if ($request->hasFile('photo')) {
+        // Supprimer l'ancienne photo si elle existe
+        if ($admin->photo) {
+            Storage::disk('public')->delete($admin->photo);
+        }
+
+        // Stocker la nouvelle photo
+        $photoPath = $request->file('photo')->store('profile_photos', 'public');
+        $admin->photo = $photoPath;
+    }
+
+    $admin->save();
+    
+    return response()->json([
+        'message' => 'Profil mis à jour avec succès',
+        'user' => [
+            'name' => $admin->name,
+            'lname' => $admin->lname,
+            'email' => $admin->email,
+            'photo' => $admin->photo ? asset('storage/' . $admin->photo) : null,
+        ],
+    ]);
+}
+
 }

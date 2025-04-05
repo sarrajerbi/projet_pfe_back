@@ -46,10 +46,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/admin/profile', [AdminController::class, 'updateProfile']);
 });
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return response()->json($request->user());
-    });
 
+// User routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', [UserController::class, 'getUser']);
     Route::patch('/user', [UserController::class, 'update']);
+    Route::post('/upload-photo', [UserController::class, 'uploadPhoto']);
 });
